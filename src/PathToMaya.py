@@ -1,7 +1,7 @@
 import sys
 
-pjrPath = "D:/Profile Redirect/culwell/Desktop/SpineAutoRiggerFinal/src"
-moduleDir = "D:/Profile Redirect/culwell/Desktop"
+pjrPath = "D:/profile redirect/culwell/Desktop/New folder/SpineAutoRiggerFinal/src"
+moduleDir = "D:/profile redirect/culwell/Desktop/New folder/"
 
 if pjrPath not in sys.path:
     sys.path.append(pjrPath)
