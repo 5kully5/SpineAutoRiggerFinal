@@ -20,6 +20,7 @@ class LimbRigger:
         self.controllerSize = 5
         self.ControllterType = [0]
         self.BoneAmmount = 12
+        self.joints = []
 
     def FindsJntsOnSelected(self):
         self.root = mc.ls(sl= True, type="joint")
@@ -57,18 +58,19 @@ class LimbRigger:
         segmentLenght = spineLength / (self.BoneAmmount - 1)
 
         mc.select(cl=True)
+        
+        self.joints = []
         for i in range(0, self.BoneAmmount):
             scalar = i * segmentLenght
             bonePos = rootPos + spineVector * scalar
             print(bonePos.z)
-            mc.joint(p=(bonePos.x, bonePos.y, bonePos.z))
+            newJnt = mc.joint(p=(bonePos.x, bonePos.y, bonePos.z))
+            self.joints.append(newJnt)
 
         print(selectedPnts)
 
-    def ChangeJntOrder(self, jointChain):
-        for joint in jointChain:
-            joint(joint, edit=True, OrientJoint='y', secondaryAxisOrient='yup', ch=True, zso=True)
-
+    def ChangeJntOrder(self):
+        mc.reroot(self.joints[-1])
 
 
     def GetPointPositionAsMVetor(self, point):
@@ -175,17 +177,18 @@ class LimbRiggerWidget(MayaWindow):
         BoneSlider.valueChanged.connect(self.ChangeAmmountOfBones)
         self.masterlayout.addWidget(BoneSlider)
 
-        autoCtrlJntBtn = QPushButton("Auto Find")
-        autoCtrlJntBtn.clicked.connect(self.autoFindJntBtnClicked)
-        self.masterlayout.addWidget(autoCtrlJntBtn)
+        rigLimbBtn = QPushButton("Rig Limb")
+        rigLimbBtn.clicked.connect(lambda : self.rigger.RigLimb())
+        self.masterlayout.addWidget(rigLimbBtn)
 
         ctrlrButton = QPushButton("ChangeBoneDirection")
         ctrlrButton.clicked.connect(self.ChangeBoneDirection)
         self.masterlayout.addWidget(ctrlrButton)
-        
+         #jointChain
     
     def ChangeAmmountOfBones(self, newvalue):
         self.BonesLabel.setText(f"{newvalue}")
+        self.BonesLabel.BoneAmmount = newvalue
 
     def CtrlSizeSliderChanged(self, newvalue):
         self.ctrlSizeLabel.setText(f"{newvalue}")
@@ -200,11 +203,7 @@ class LimbRiggerWidget(MayaWindow):
         except Exception as e:
             QMessageBox.critical(self, "error", f"[{e}]")
 
-    def autoFindJntBtnClicked(self):
-        try:
-            self.rigger.FindsJntsOnSelected()
-        except Exception as e:
-            QMessageBox.critical(self, "error", f"[{e}]")
+    
 
 LimbRiggerWidget = LimbRiggerWidget()
 LimbRiggerWidget.show()
