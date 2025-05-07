@@ -137,7 +137,7 @@ class LimbRigger:
 
         topGrpName = f"{self.root}_rig_grp"
         mc.group([rootCtrlGrp, ikEndCtrlGrp, poleVectorCtrlGrp, ikfkBlendCtrlGrp], n=topGrpName)
-        mc.parent(ikHandleName, ikEndCtrl)
+        mc.parent(ikHandleName, ikEndCtrl, rootCtrlGrp)
 
         mc.setAttr(topGrpName+".overrideEnable", 1)
         
@@ -183,7 +183,7 @@ class LimbRiggerWidget(MayaWindow):
         self.masterlayout.addLayout(BoneAmmountLayout)
 
         rigLimbBtn = QPushButton("Rig Limb")
-        rigLimbBtn.clicked.connect(self.AddControllerAndParent())
+        rigLimbBtn.clicked.connect(self.rigger.RigLimb)
         self.masterlayout.addWidget(rigLimbBtn)
 
         ctrlrButton = QPushButton("ChangeBoneDirection")
@@ -191,8 +191,6 @@ class LimbRiggerWidget(MayaWindow):
         self.masterlayout.addWidget(ctrlrButton)
          #jointChain
         
-    def AddControllerAndParent(self):
-        self.rigger.RigLimb
     
     def ChangeAmmountOfBones(self, newvalue):
         self.BonesLabel.setText(f"{newvalue}")
