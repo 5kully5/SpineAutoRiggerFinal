@@ -180,7 +180,7 @@ class LimbRiggerWidget(MayaWindow):
         BoneAmmountLayout = QHBoxLayout()
         BoneAmmountLayout.addWidget(BoneSlider)
         BoneAmmountLayout.addWidget(self.BonesLabel)
-        self.masterlayout.addLayout(ctrlrSizeLayout)
+        self.masterlayout.addLayout(BoneAmmountLayout)
 
         rigLimbBtn = QPushButton("Rig Limb")
         rigLimbBtn.clicked.connect(self.AddControllerAndParent())
@@ -210,6 +210,8 @@ class LimbRiggerWidget(MayaWindow):
             self.rigger.FindVertsBasedOnSelection()
         except Exception as e:
             QMessageBox.critical(self, "error", f"[{e}]")
+
+    
 
 LimbRiggerWidget = LimbRiggerWidget()
 LimbRiggerWidget.show()
