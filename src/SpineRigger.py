@@ -27,16 +27,6 @@ class LimbRigger:
         self.mid = mc.listRelatives(self.root, c=True, type="joint")[0]
         self.end = mc.listRelatives(self.mid, c=True, type="joint")[0]
     
-    def CreateBoxController(self, name):
-        #copy the mel code you get from maya and import it into here after name
-        mel.eval(f"curve -n {name} -d 1 -p -0.5 0.5 -0.5 -p 0.5 0.5 -0.5 -p 0.5 -0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 0.5 0.5 -p 0.5 0.5 0.5 -p 0.5 0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 -0.5 0.5 -p 0.5 0.5 0.5 -p -0.5 0.5 0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p -0.5 -0.5 0.5 -p -0.5 -0.5 -0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 ;")
-        mc.scale(self.controllerSize, self.controllerSize, self.controllerSize, name)
-        mc.makeIdentity(name, apply=True) #freeze tranformation
-        grpName = name + "_grp"
-        mc.group(name, n = grpName)
-        return name, grpName
-        
-        jntsListLineEdit
 
     def FindVertsBasedOnSelection(self):
         selectedPnts = mc.ls(sl=True)
@@ -72,7 +62,6 @@ class LimbRigger:
     def ChangeJntOrder(self):
         mc.reroot(self.joints[-1])
 
-
     def GetPointPositionAsMVetor(self, point):
         # get point position
         x, y, z = mc.pointPosition(point)
@@ -86,6 +75,15 @@ class LimbRigger:
         grpName = name + "_grp"
         mc.group(name, n = grpName)
         return name, grpName
+    
+    def CreateFKControllerForJnts(self, jntName):
+        ctrlName = "ac_l_fk_" + jntName
+        ctrlGrpName = ctrlName + "_grp"
+        mc.circle(name = ctrlName, radius = self.controllerSize, normal = (1,0,0))
+        mc.group(ctrlName, n=ctrlName)
+        mc.matchTransform(ctrlGrpName, jntName)
+        mc.orientConstraint(ctrlName, jntName)
+        return ctrlName, ctrlGrpName
     
     def RigLimb(self):
         rootCtrl, rootCtrlGrp = self.CreateFKControllerForJnts(self.root)
@@ -142,8 +140,6 @@ class LimbRigger:
         mc.parent(ikHandleName, ikEndCtrl)
 
         mc.setAttr(topGrpName+".overrideEnable", 1)
-        mc.setAttr(topGrpName+".overrideRGBColors", 1)
-        mc.setAttr(topGrpName+".overrideRGBColors", self.ControllerColor[0], self.ControllerColor[1], self.ControllerColor[2], type="double3")
         
 class LimbRiggerWidget(MayaWindow):
     def __init__(self):
@@ -167,7 +163,12 @@ class LimbRiggerWidget(MayaWindow):
         ctrlSizeSlider.setValue(self.rigger.controllerSize)
         self.ctrlSizeLabel = QLabel(f"{self.rigger.controllerSize}")
         ctrlSizeSlider.valueChanged.connect(self.CtrlSizeSliderChanged)
-        self.masterlayout.addWidget(ctrlSizeSlider)
+
+
+        ctrlrSizeLayout = QHBoxLayout()
+        ctrlrSizeLayout.addWidget(ctrlSizeSlider)
+        ctrlrSizeLayout.addWidget(self.ctrlSizeLabel)
+        self.masterlayout.addLayout(ctrlrSizeLayout)
 
         BoneSlider = QSlider()
         BoneSlider.setOrientation(Qt.Horizontal)
@@ -175,16 +176,23 @@ class LimbRiggerWidget(MayaWindow):
         BoneSlider.setValue(self.rigger.BoneAmmount)
         self.BonesLabel = QLabel(f"{self.rigger.BoneAmmount}")
         BoneSlider.valueChanged.connect(self.ChangeAmmountOfBones)
-        self.masterlayout.addWidget(BoneSlider)
+        
+        BoneAmmountLayout = QHBoxLayout()
+        BoneAmmountLayout.addWidget(BoneSlider)
+        BoneAmmountLayout.addWidget(self.BonesLabel)
+        self.masterlayout.addLayout(BoneAmmountLayout)
 
         rigLimbBtn = QPushButton("Rig Limb")
-        rigLimbBtn.clicked.connect(lambda : self.rigger.RigLimb())
+        rigLimbBtn.clicked.connect(self.AddControllerAndParent())
         self.masterlayout.addWidget(rigLimbBtn)
 
         ctrlrButton = QPushButton("ChangeBoneDirection")
         ctrlrButton.clicked.connect(self.ChangeBoneDirection)
         self.masterlayout.addWidget(ctrlrButton)
          #jointChain
+        
+    def AddControllerAndParent(self):
+        self.rigger.RigLimb
     
     def ChangeAmmountOfBones(self, newvalue):
         self.BonesLabel.setText(f"{newvalue}")
@@ -197,11 +205,6 @@ class LimbRiggerWidget(MayaWindow):
     def ChangeBoneDirection(self):
         self.rigger.ChangeJntOrder()
         
-    def FindVtxBtnClicked(self):
-        try:
-            self.rigger.FindVertsBasedOnSelection()
-        except Exception as e:
-            QMessageBox.critical(self, "error", f"[{e}]")
 
     
 
