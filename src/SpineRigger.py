@@ -180,7 +180,7 @@ class LimbRiggerWidget(MayaWindow):
         BoneAmmountLayout = QHBoxLayout()
         BoneAmmountLayout.addWidget(BoneSlider)
         BoneAmmountLayout.addWidget(self.BonesLabel)
-        self.masterlayout.addLayout(BoneAmmountLayout)
+        self.masterlayout.addLayout(ctrlrSizeLayout)
 
         rigLimbBtn = QPushButton("Rig Limb")
         rigLimbBtn.clicked.connect(self.AddControllerAndParent())
@@ -205,8 +205,11 @@ class LimbRiggerWidget(MayaWindow):
     def ChangeBoneDirection(self):
         self.rigger.ChangeJntOrder()
         
-
-    
+    def FindVtxBtnClicked(self):
+        try:
+            self.rigger.FindVertsBasedOnSelection()
+        except Exception as e:
+            QMessageBox.critical(self, "error", f"[{e}]")
 
 LimbRiggerWidget = LimbRiggerWidget()
 LimbRiggerWidget.show()
