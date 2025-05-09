@@ -93,6 +93,7 @@ class LimbRigger:
         mc.parent(midCtrlGrp, rootCtrl)
         mc.parent(endCtrlGrp, midCtrl)
         #making the bones link to the controller
+        #have to make it where instead of looking for "rig_grp" it looks for bone so it would be (BoneAmmount / 2)
 
         ikEndCtrl = "ac_ik_" + self.end
         ikEndCtrl, ikEndCtrlGrp = self.CreateBoxController(ikEndCtrl)
@@ -137,7 +138,7 @@ class LimbRigger:
 
         topGrpName = f"{self.root}_rig_grp"
         mc.group([rootCtrlGrp, ikEndCtrlGrp, poleVectorCtrlGrp, ikfkBlendCtrlGrp], n=topGrpName)
-        mc.parent(ikHandleName, ikEndCtrl, rootCtrlGrp)
+        mc.parent(ikHandleName, ikEndCtrl, rootCtrlGrp) 
 
         mc.setAttr(topGrpName+".overrideEnable", 1)
         
@@ -172,7 +173,8 @@ class LimbRiggerWidget(MayaWindow):
 
         BoneSlider = QSlider()
         BoneSlider.setOrientation(Qt.Horizontal)
-        BoneSlider.setRange(1, 100)
+        BoneSlider.setRange(1, 100) #Bug where it changes the number ammount but not the actual bone
+        #Error will happen if you its not divisable by two, would make it stepped but idk how to do that
         BoneSlider.setValue(self.rigger.BoneAmmount)
         self.BonesLabel = QLabel(f"{self.rigger.BoneAmmount}")
         BoneSlider.valueChanged.connect(self.ChangeAmmountOfBones)
